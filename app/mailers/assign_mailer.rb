@@ -12,4 +12,10 @@ class AssignMailer < ApplicationMailer
     @title = title 
     mail to: @email, subject: 'アジェンダが削除されました。'
   end
+
+  def update_mail(email, name)
+    @email = email
+    @name = name
+    mail to: @email, subject: 'オーナー権限が移行されました。'
+  end
 end
