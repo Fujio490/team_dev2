@@ -21,6 +21,28 @@ class AgendasController < ApplicationController
     end
   end
 
+  def destroy
+    agenda = Agenda.find(params[:id])
+    team_members = agenda.team.members
+
+    agenda_user = agenda.user_id
+    owner_id = agenda.team.owner_id
+    puts "agenda_user:#{agenda_user}"
+    puts "owener_id:#{owner_id}"
+    puts "current_user:#{current_user.id}"
+
+    if current_user.id != agenda_user && current_user.id != owner_id
+      redirect_to dashboard_url, notice: 'アジェンダ作成者、チームリーダーのみ削除できます。'
+    elsif agenda.destroy
+      team_members.each do | member |
+        AssignMailer.del_agenda_mail(member.email, agenda.title).deliver
+      end
+      redirect_to dashboard_url, notice: 'アジェンダを削除しました。'
+    else
+      redirect_to dashboard_url, notice: '削除に失敗しました。'
+    end
+  end
+
   private
 
   def set_agenda

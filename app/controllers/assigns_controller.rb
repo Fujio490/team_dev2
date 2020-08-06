@@ -12,13 +12,41 @@ class AssignsController < ApplicationController
     end
   end
 
-  def destroy
-    assign = Assign.find(params[:id])
-    destroy_message = assign_destroy(assign, assign.user)
+  def update
+    team = Team.friendly.find(params[:team_id])
 
-    redirect_to team_url(params[:team_id]), notice: destroy_message
+    if current_user.id == team.owner_id
+      assign_id = params[:id]
+      assign = Assign.find(params[:id])
+      team.owner_id = assign.user_id
+      if team.save
+        user = User.find(assign.user_id)
+        AssignMailer.update_mail(user.email, team.name).deliver
+        redirect_to team_url(team), notice: 'update success'
+      else
+        redirect_to team_url(team), notice: 'update miss'
+      end
+    else
+      redirect_to team_url(team), notice: 'you can\'t grant owner'
+    end
   end
 
+  def destroy
+    assign = Assign.find(params[:id])
+    assigned_user = assign.user
+    if assigned_user == assign.team.owner
+      redirect_to team_url(params[:team_id]), notice: 'リーダーは削除できません。'
+    elsif Assign.where(user_id: assigned_user.id).count == 1
+      redirect_to team_url(params[:team_id]), notice: 'このユーザーはこのチームにしか所属していないため、削除できません。'
+    elsif current_user != assign.team.owner && current_user != assign.user
+      redirect_to team_url(params[:team_id]), notice: 'チームのリーダーか、ユーザー自身でない場合、削除できません。'
+    else
+      another_team = Assign.find_by(user_id: assigned_user.id).team
+      change_keep_team(assigned_user, another_team) if assigned_user.keep_team_id == assign.team_id
+      assign.destroy
+      redirect_to team_url(params[:team_id]), notice: 'メンバーを削除しました。'
+    end
+  end
   private
 
   def assign_params
