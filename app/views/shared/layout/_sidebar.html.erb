@@ -14,12 +14,12 @@
 
     <div class="user-panel mt-3 pb-3 mb-3">
       <div class="info">
-        <a href="#" class="d-block mb-1"><%= I18n.t('views.messages.create_agenda') %></a>
+        <a href="#" class="d-block mb-1">アジェンダ作成</a>
         <%= form_with model: :agenda, scope: :post, url: team_agendas_path(@working_team), local: true do |form| %>
           <div class="input-group input-group-sm">
-            <%= text_field_tag :title, '', { class: 'form-control', placeholder: I18n.t('views.messages.input_agenda_title') } %>
+            <%= text_field_tag :title, '', { class: 'form-control', placeholder: 'タイトル入力' } %>
             <span class="input-group-append">
-              <button type="submit" class="btn btn-info btn-flat"><%= I18n.t('views.button.create') %></button>
+              <button type="submit" class="btn btn-info btn-flat">作成</button>
             </span>
           </div>
         <% end %>
@@ -30,13 +30,13 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <% @working_team.agendas.each do |agenda| %>
           <li class="nav-item has-treeview menu-open">
-            <a href="#" class="nav-link">
+            <span href="#" class="nav-link">
               <i class="fa fa-circle-o nav-icon"></i>
-              <p>
                 <%= agenda.title %>
-                <i class="right fa fa-angle-left"></i>
-              </p>
-            </a>
+                <%= link_to "DEL" , agenda_path(agenda), method: :delete, class: "btn-sm btn-default"%>
+               <i class="right fa fa-angle-left">
+               </i>
+            </span>
             <ul class="nav nav-treeview" style="display: block;">
               <% agenda.articles.each do |article| %>
                 <li class="nav-item">
@@ -47,7 +47,7 @@
               <% end %>
               <li class="nav-item">
                 <%= link_to new_agenda_article_path(agenda), class: 'nav-link' do %>
-                  <p>+ <%= I18n.t('views.messages.create_article') %></p>
+                  <p>+ 記事を作成する</p>
                 <% end %>
               </li>
             </ul>
